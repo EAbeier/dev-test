@@ -14,6 +14,7 @@ namespace Persistence.Configurations
             builder.Property(b => b.PhoneNumber).IsRequired().HasColumnType("varchar(15)");
             builder.Property(b => b.DocumentNumber).IsRequired().HasColumnType("varchar(20)");
             builder.Property(b => b.Email).IsRequired().HasColumnType("varchar(255)");
+            builder.Property(c => c.BirthDate).HasColumnType("date").IsRequired();
             builder.OwnsOne(c => c.Address, addressBuilder =>
             {
                 addressBuilder.Property(a => a.PostalCode).IsRequired().HasColumnType("varchar(10)");
