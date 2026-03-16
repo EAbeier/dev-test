@@ -1,5 +1,5 @@
 import React, { Suspense, useEffect, useState } from "react";
-import { Button, Card, Row, Col} from "react-bootstrap";
+import { Button, Card, Row, Col } from "react-bootstrap";
 import { NAVIGATION_PATH } from "@/constants";
 import { Client } from "@/types/api/Client";
 import DataTable from "@/components/DataTable";
@@ -15,7 +15,7 @@ const ClientListing = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        setDate(new Date());
+
     }, []);
 
     return (
@@ -67,11 +67,10 @@ const ClientListing = () => {
                         ]}
                         queryName={["client", "listing", date]}
                         onRowClick={(client: Client) => navigate(`${NAVIGATION_PATH.CLIENTS.EDIT.ABSOLUTE}/${client.id}`)}
-                      
+
                     />
                 </Suspense>
             </Card>
-            {}
         </>
     );
 };
