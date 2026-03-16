@@ -24,7 +24,7 @@ namespace Application.Client.Queries.ClientByDocumentQuery
         public async Task<IEnumerable<ClientByDocumentQueryResponse>> Handle(ClientByDocumentQueryRequest request, CancellationToken cancellationToken)
         {
             var client = await _context.Clients
-                .Where(x => x.DocumentNumber == request.DocumentNumber)
+                .Where(x => x.DocumentNumber.Contains(request.DocumentNumber))
                 .Select(x => new ClientByDocumentQueryResponse
                 {
                     Id = x.Id,

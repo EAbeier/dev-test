@@ -1,5 +1,5 @@
 import { Helmet } from "react-helmet-async";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { NAVIGATION_PATH } from "@/constants";
 import { Client } from "@/types/api/Client";
 import { TextFormFieldType } from "@/components/form/TextFormField/TextFormFieldType";
@@ -11,7 +11,7 @@ import { handlePhoneNumberChange } from "@/helpers/handlePhoneNumberChange";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { ReactQueryKeys } from "@/constants/ReactQueryKeys";
 import yup from "@/utils/yup";
-import React, { Suspense } from "react";
+import React, { Suspense, useState } from "react";
 import { Button, Card, Col, Form, Row } from "react-bootstrap";
 import { Formik } from "formik";
 
@@ -21,6 +21,7 @@ const INITIAL_VALUES: Client = {
   phoneNumber: "",
   email: "",
   documentNumber: "",
+  birthDate: "",
   address: {
     postalCode: "",
     addressLine: "",
@@ -38,28 +39,84 @@ const schemaValidation = yup.object().shape({
   phoneNumber: yup.string().required("Telefone é obrigatório"),
   email: yup.string().email("Email inválido").required("Email é obrigatório"),
   documentNumber: yup.string().required("Documento é obrigatório"),
+  birthDate: yup.string().required("Data de Nascimento é obrigatório"),
   address: yup.object().shape({
     postalCode: yup.string().required("CEP é obrigatório"),
     addressLine: yup.string().required("Endereço é obrigatório"),
     number: yup.string().required("Número é obrigatório"),
     neighborhood: yup.string().required("Bairro é obrigatório"),
     city: yup.string().required("Cidade é obrigatória"),
-    state: yup.string().required("Estado é obrigatório"),
+    state: yup.string().required("Estado é obrigatório").max(2, "O Estado deve ter só a Sigla"),
   }),
 });
 
 const ClientForm = () => {
   const navigate = useNavigate();
-  
-
+  const { id } = useParams<{ id: string }>();
+  const [file, setFile] = useState<File | null>(null);
+  const [importLoading, setImportLoading] = useState(false);
   const { data } = useSuspenseQuery<Client>({
-    queryKey: [ReactQueryKeys.CLIENT],
+    queryKey: [ReactQueryKeys.CLIENT, id],
     meta: {
       fetchFn: async () => {
+        if (id) {
+          const client = await ClientService.getById(id);
+          return {
+            ...client,
+            birthDate: isoToBr(client.birthDate),
+            phoneNumber: client.phoneNumber,
+            address: {
+              ...client.address,
+              postalCode: client.address.postalCode,
+            }
+          };
+        }
         return INITIAL_VALUES;
       },
     },
   });
+
+  const handleImport = async () => {
+    if (!file) return;
+    try {
+      setImportLoading(true);
+      await ClientService.importCsv(file);
+      toastr({ title: "Importação realizada com sucesso", icon: "success" });
+      setFile(null);
+    } catch (err: any) {
+      toastr({ title: "Erro na importação", text: err.message, icon: "error" });
+    } finally {
+      setImportLoading(false);
+    }
+  };
+
+  const handleExportTemplate = async () => {
+    try {
+      const response = await ClientService.exportTemplate();
+      const url = window.URL.createObjectURL(new Blob([response]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "template.csv");
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode?.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (err: any) {
+      toastr({ title: "Erro ao exportar template", text: err.message, icon: "error" });
+    }
+  };
+
+  function brToIso(dateStr: string) {
+    const [day, month, year] = dateStr.split("/");
+    return `${year}-${month}-${day}`;
+  }
+
+  function isoToBr(dateStr: string) {
+    const datePart = dateStr.split("T")[0];
+    const [year, month, day] = datePart.split("-");
+    if (year === "0001") return "";
+    return `${day}/${month}/${year}`;
+  }
 
   async function onSubmit(values: Client) {
     try {
@@ -70,17 +127,23 @@ const ClientForm = () => {
           ...values.address,
           postalCode: values.address.postalCode.replace(/\D/g, ''),
         },
+        birthDate: brToIso(values.birthDate)
       };
 
-      await ClientService.create(clientToSave);
-      toastr({ title: "Cliente criado com sucesso", icon: "success" });
+      if (id) {
+        await ClientService.update(id, clientToSave);
+        toastr({ title: "Cliente atualizado com sucesso", icon: "success" });
+      } else {
+        await ClientService.create(clientToSave);
+        toastr({ title: "Cliente criado com sucesso", icon: "success" });
+      }
       navigate(NAVIGATION_PATH.CLIENTS.LISTING.ABSOLUTE);
     } catch (err: any) {
       toastr({ title: "Erro", text: err.message, icon: "error" });
     }
   }
 
-  const title = "Novo Cliente";
+  const title = id ? "Editar Cliente" : "Novo Cliente";
 
   return (
     <React.Fragment>
@@ -173,6 +236,19 @@ const ClientForm = () => {
                         handleChange={handleChange}
                         value={values.documentNumber}
                         formikError={errors.documentNumber}
+                      />
+                    </Col>
+                    <Col md={4}>
+                      <TextFormField
+                        componentType={TextFormFieldType.DATE_PICKER}
+                        name="birthDate"
+                        label="Data de Nascimento"
+                        required
+                        placeholder="Data de Nascimento"
+                        handleBlur={handleBlur}
+                        handleChange={handleChange}
+                        value={values.birthDate}
+                        formikError={errors.birthDate}
                       />
                     </Col>
                   </Row>
@@ -289,6 +365,40 @@ const ClientForm = () => {
             </Formik>
           </Card.Body>
         </Card>
+        { !id &&
+          <Card style={{ marginBottom: "20px" }}>
+            <Card.Header>
+              <Card.Title>Importar/Exportar</Card.Title>
+            </Card.Header>
+            <Card.Body>
+              <Row>
+                <Col md={6}>
+                  <Form.Group>
+                    <Form.Label>Selecionar arquivo CSV</Form.Label>
+                    <Form.Control
+                      type="file"
+                      accept=".csv"
+                      onChange={(e) => setFile((e.target as HTMLInputElement).files?.[0] || null)}
+                    />
+                  </Form.Group>
+                </Col>
+                <Col md={6} className="d-flex align-items-end">
+                  <Button
+                    variant="primary"
+                    onClick={handleImport}
+                    disabled={!file || importLoading}
+                    className="me-2"
+                  >
+                    {importLoading ? "Importando..." : "Importar"}
+                  </Button>
+                  <Button variant="secondary" onClick={handleExportTemplate}>
+                    Exportar Template
+                  </Button>
+                </Col>
+              </Row>
+            </Card.Body>
+          </Card>
+        }
       </Suspense>
     </React.Fragment>
   );

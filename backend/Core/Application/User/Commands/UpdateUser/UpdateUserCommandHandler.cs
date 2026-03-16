@@ -1,4 +1,3 @@
-
 using Application.Common.Exceptions;
 using Application.Common.Interfaces;
 using MediatR;
@@ -19,7 +18,8 @@ namespace Application.User.Commands.UpdateUser
 
         public async Task<Unit> Handle(UpdateUserCommandRequest request, CancellationToken cancellationToken)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == request.Id, cancellationToken);
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.Id == request.Id, cancellationToken);
 
             if (user == null)
             {

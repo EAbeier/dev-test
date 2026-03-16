@@ -18,8 +18,23 @@ class ClientService extends BaseService {
     return await this.get<Client>(id);
   }
 
+  async getByDocument(documentNumber: string): Promise<Client[]> {
+    return await this.get<Client[]>("", { documentNumber });
+  }
+
   async update(id: string, client: Client): Promise<void> {
     return await this.put<Client, void>(id, client);
+  }
+
+  async importCsv(file: File): Promise<void> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return await this.post<FormData, void>("import", formData);
+  }
+
+  async exportTemplate(): Promise<Blob> {
+    return await this.get("Template");
+
   }
 }
 
