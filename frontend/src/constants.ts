@@ -26,8 +26,34 @@ export const NAVIGATION_PATH = {
             RELATIVE: "criar",
             ABSOLUTE: "/clientes/criar"
         },
+        EDIT: {
+            RELATIVE: "editar/:id",
+            ABSOLUTE: "/clientes/editar"
+        },
         
-    }
+    },
+    USERS: {
+        ROOT: "usuarios",
+        LISTING: {
+            RELATIVE: "listagem",
+            ABSOLUTE: "/usuarios/listagem"
+        },
+        CREATE: {
+            RELATIVE: "criar",
+            ABSOLUTE: "/usuarios/criar"
+        },
+        EDIT: {
+            RELATIVE: "editar/:id",
+            ABSOLUTE: "/usuarios/editar"
+        }
+    },
+    IMPORTS: {
+        ROOT: "importacoes",
+        LISTING: {
+            RELATIVE: "listagem",
+            ABSOLUTE: "/importacoes/listagem"
+        },
+    }   
 }
 
 

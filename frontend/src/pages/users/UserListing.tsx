@@ -5,11 +5,11 @@ import { Client } from "@/types/api/Client";
 import DataTable from "@/components/DataTable";
 import { Link, useNavigate } from "react-router-dom";
 import Loader from "@/components/Loader";
-import ClientService from "@/services/ClientService";
-import { TextFormFieldType } from "@/components/form/TextFormField/TextFormFieldType";
+import UserService from "@/services/UserService";
+import { User } from "@/types/api/User";
 
 
-const ClientListing = () => {
+const UserListing = () => {
     const [date, setDate] = useState<Date>();
 
     const navigate = useNavigate();
@@ -21,7 +21,7 @@ const ClientListing = () => {
     return (
         <>
             <Row style={{ justifyContent: "end", margin: "10px 0" }}>
-                <Link to={NAVIGATION_PATH.CLIENTS.CREATE.ABSOLUTE}>
+                <Link to={NAVIGATION_PATH.USERS.CREATE.ABSOLUTE}>
                     <Button style={{ maxWidth: "fit-content", float: "right" }}>
                         Adicionar
                     </Button>
@@ -39,34 +39,21 @@ const ClientListing = () => {
                 </Card.Header>
 
                 <Suspense fallback={<><Loader /><br /><br /></>}>
-                    <DataTable<Client, any>
+                    <DataTable<User, any>
                         thin
                         columns={[
-                            { Header: "Nome", accessor: "firstName" },
-                            { Header: "Sobrenome", accessor: "lastName" },
-                            { Header: "Email", accessor: "email" },
-                            { Header: "Telefone", accessor: "phoneNumber" },
-                            { Header: "Documento", accessor: "documentNumber" },
+                            { Header: "id", accessor: "id" },
+                            { Header: "User Name", accessor: "username" },
+                            { Header: "Profile", accessor: "profile" },
                         ]}
                         query={async (filters) => {
-                            if (!filters || !filters[0]) {
-                                console.log("Fetching all clients");
-                                return await ClientService.getAll();
-                            }
-                            return await ClientService.getByDocument(filters[0].value.trim());
+                            return await UserService.getAll();
                         }}
                         fetchButton
                         cleanButton
-                        filters={[
-                            {
-                                componentType: TextFormFieldType.INPUT,
-                                name: "documentNumber",
-                                label: "Buscar clientes...",
-                                type: "text",
-                            },
-                        ]}
-                        queryName={["client", "listing", date]}
-                        onRowClick={(client: Client) => navigate(`${NAVIGATION_PATH.CLIENTS.EDIT.ABSOLUTE}/${client.id}`)}
+                        filters={[]}
+                        queryName={["user", "listing", date]}
+                        onRowClick={(user: User) => navigate(`${NAVIGATION_PATH.USERS.EDIT.ABSOLUTE}/${user.id}`)}
                       
                     />
                 </Suspense>
@@ -76,4 +63,4 @@ const ClientListing = () => {
     );
 };
 
-export default ClientListing;
+export default UserListing;

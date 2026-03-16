@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.Extensions.Configuration;
+using BackgroundServices;
 
 namespace WebApi
 {
@@ -42,6 +43,7 @@ namespace WebApi
             services.AddCustomFramework();
             services.AddApplication();
             services.AddControllers();
+            services.AddHostedService<ClientImportBackgroundService>();
             services.AddPersistence();
 
             services.AddAuthentication(options =>

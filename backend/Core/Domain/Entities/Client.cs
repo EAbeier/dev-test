@@ -11,12 +11,12 @@ namespace Domain
         public string PhoneNumber { get; private set; }
         public string Email { get; private set; }
         public string DocumentNumber { get; private set; }
-        public DateOnly BirthDate { get; private set; }
+        public DateTime BirthDate { get; private set; }
         public Address Address { get; set; }
 
         public Client() { }
 
-        public Client(string firstName, string lastName, string phoneNumber, string email, string documentNumber, DateOnly birthDate, Address address)
+        public Client(string firstName, string lastName, string phoneNumber, string email, string documentNumber, DateTime birthDate, Address address)
         {
             FirstName = firstName;
             LastName = lastName;
@@ -27,7 +27,7 @@ namespace Domain
             Address = address;
         }
 
-        public void Update(string firstName, string lastName, string phoneNumber, string email, string documentNumber, DateOnly birthDate) 
+        public void Update(string firstName, string lastName, string phoneNumber, string email, string documentNumber, DateTime birthDate) 
         {
             FirstName = firstName;
             LastName = lastName;

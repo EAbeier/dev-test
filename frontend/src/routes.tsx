@@ -29,15 +29,33 @@ export const routes = createBrowserRouter([
         errorElement: <Page500 />,
         Component: SplashScreenLayout
     },
-    
+
     {
         path: NAVIGATION_PATH.CLIENTS.ROOT,
-        element: <AuthGuard belongsTo={[UserProfile.Administrator]}><DashboardLayout /></AuthGuard>,
+        element: <AuthGuard belongsTo={[UserProfile.Administrator, UserProfile.Operator]}><DashboardLayout /></AuthGuard>,
         errorElement: <Page500 />,
         children: [
             { path: NAVIGATION_PATH.CLIENTS.LISTING.RELATIVE, Component: lazy(() => import("@/pages/clients/ClientListing")) },
             { path: NAVIGATION_PATH.CLIENTS.CREATE.RELATIVE, Component: lazy(() => import("@/pages/clients/ClientForm")) },
-            
+            { path: NAVIGATION_PATH.CLIENTS.EDIT.RELATIVE, Component: lazy(() => import("@/pages/clients/ClientForm")) },
+        ]
+    },
+    {
+        path: NAVIGATION_PATH.IMPORTS.ROOT,
+        element: <AuthGuard belongsTo={[UserProfile.Administrator, UserProfile.Operator]}><DashboardLayout /></AuthGuard>,
+        errorElement: <Page500 />,
+        children: [
+            { path: NAVIGATION_PATH.IMPORTS.LISTING.RELATIVE, Component: lazy(() => import("@/pages/imports/ImportListing")) },
+        ]
+    },
+    {
+        path: NAVIGATION_PATH.USERS.ROOT,
+        element: <AuthGuard belongsTo={[UserProfile.Administrator]}><DashboardLayout /></AuthGuard>,
+        errorElement: <Page500 />,
+        children: [
+            { path: NAVIGATION_PATH.USERS.LISTING.RELATIVE, Component: lazy(() => import("@/pages/users/UserListing")) },
+            { path: NAVIGATION_PATH.USERS.CREATE.RELATIVE, Component: lazy(() => import("@/pages/users/UserForm")) },
+            { path: NAVIGATION_PATH.USERS.EDIT.RELATIVE, Component: lazy(() => import("@/pages/users/UserForm")) },
         ]
     },
     {

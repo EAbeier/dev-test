@@ -47,6 +47,7 @@ interface DataTableProps<T extends {}, TFilter> {
     rowSelectionShowIfFn?: (row: T) => boolean,
     exportFn?: (filters: any[]) => Promise<{ url: string }>;
     cleanFn?: () => Promise<void>;
+    onRowClick?: (row: T) => void;
 }
 
 const IndeterminateCheckbox = React.forwardRef(
@@ -279,7 +280,7 @@ export default function DataTable<T extends {}, TFilter extends BaseFilter>(prop
                             ) : rows.map((row: RowType<any>, index: number) => {
                                 prepareRow(row);
                                 return (
-                                    <tr {...row.getRowProps()} key={index}>
+                                    <tr {...row.getRowProps()} onClick={() => props.onRowClick?.(row.original)} key={index} style={props.onRowClick ? { cursor: 'pointer' } : {}}>
                                         {row.cells.map((cell: Cell<object>, cellIndex) => {
                                             return (
                                                 <td {...cell.getCellProps()} key={cellIndex}>{cell.render("Cell")}</td>
